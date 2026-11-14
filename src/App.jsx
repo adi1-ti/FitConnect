@@ -43,7 +43,7 @@ export default function App() {
 
   const points = totalPoints(activities, claimed)
   const level = getLevel(points)
-  const rank = getRank(points, user)
+  const rank = user ? getRank(points, user) : null
 
   const notify = (message) => {
     setToast(message)

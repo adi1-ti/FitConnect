@@ -11,7 +11,7 @@ export async function getActivities() {
 
   if (error) throw error
 
-  return data.map((a) => ({
+  return (data || []).map((a) => ({
     id: a.id,
     type: a.activity_type,
     duration: a.duration_minutes,
@@ -24,15 +24,28 @@ export async function getActivities() {
 
 // Save a new activity
 export async function saveActivity(activity) {
+  // Get the currently authenticated user
+  const {
+    data: { user },
+    error: userError
+  } = await supabase.auth.getUser()
+
+  if (userError) throw userError
+
+  if (!user) {
+    throw new Error('Please log in before saving an activity.')
+  }
+
   const { data, error } = await supabase
     .from('activities')
     .insert({
+      user_id: user.id,
       activity_type: activity.type,
-      duration_minutes: activity.duration,
-      distance_km: activity.distance,
+      duration_minutes: Number(activity.duration),
+      distance_km: Number(activity.distance || 0),
       activity_date: activity.date,
-      points: activity.points,
-      steps: activity.steps
+      points: Number(activity.points),
+      steps: Number(activity.steps || 0)
     })
     .select()
     .single()
